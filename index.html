@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Channel Jendela Cerita</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+  <!-- HEADER -->
+  <header class="bg-blue-600 text-white p-6 text-center">
+    <h1 class="text-3xl font-bold">Channel YouTube Jendela Cerita</h1>
+    <p class="text-sm mt-1">Temukan semua video kami 🎬</p>
+  </header>
+
+  <!-- VIDEO SECTION -->
+  <section class="max-w-6xl mx-auto px-4 py-8">
+    <h2 class="text-xl font-semibold mb-4">🎥 Semua Video</h2>
+    <div id="videoList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-gray-200 text-center text-sm text-gray-600 p-4">
+    © <span id="year"></span> Jendela Cerita | Dibuat dengan ❤️ dan API YouTube
+  </footer>
+
+  <script>
+    const API_KEY = 'AIzaSyDog2kn4dh0nrFYa3_aHwSDAITIsHHhciM'; // Ganti dengan API key kamu
+    const CHANNEL_ID = 'UCcpMp0LFsZ3mX2TSVgfk1ow'; // Channel Jendela Cerita
+    const videoList = document.getElementById('videoList');
+
+    async function fetchAllVideos(pageToken = '') {
+      const baseUrl = `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet,id&order=date&type=video&maxResults=50&pageToken=${pageToken}`;
+      
+      try {
+        const res = await fetch(baseUrl);
+        const data = await res.json();
+
+        if (!data.items || data.items.length === 0) {
+          if (!pageToken) {
+            videoList.innerHTML = `<p class="text-center text-red-500 col-span-2">Tidak ada video ditemukan.</p>`;
+          }
+          return;
+        }
+
+        data.items.forEach(item => {
+          const { title, publishedAt, thumbnails } = item.snippet;
+          const videoId = item.id.videoId;
+          const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
+          const card = `
+            <a href="${videoUrl}" target="_blank" class="block bg-white rounded shadow hover:shadow-lg transition p-3">
+              <img src="${thumbnails.medium.url}" alt="${title}" class="rounded mb-2 w-full">
+              <h3 class="text-blue-600 font-medium">${title}</h3>
+              <p class="text-xs text-gray-500 mt-1">Dipublikasikan: ${new Date(publishedAt).toLocaleDateString()}</p>
+            </a>
+          `;
+          videoList.insertAdjacentHTML('beforeend', card);
+        });
+
+        if (data.nextPageToken) {
+          await fetchAllVideos(data.nextPageToken);
+        }
+
+      } catch (error) {
+        videoList.innerHTML = `<p class="text-red-500 col-span-2">Terjadi kesalahan: ${error.message}</p>`;
+      }
+    }
+
+    fetchAllVideos();
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
