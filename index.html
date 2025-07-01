@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -62,7 +61,7 @@
 
     async function fetchAllVideos(pageToken = '') {
       const baseUrl = `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet,id&order=date&type=video&maxResults=50&pageToken=${pageToken}`;
-
+      
       try {
         const res = await fetch(baseUrl);
         const data = await res.json();
